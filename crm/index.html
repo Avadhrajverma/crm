@@ -1,0 +1,2713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IPCRM Admin Portal</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <style>
+    @font-face {
+      font-family: 'IPACCTFONT';
+      src: url('../crm/ipacct.ttf') format('truetype');
+      font-weight: 900;
+      font-display: swap;
+    }
+    
+    :root {
+      --ip-blue: #033567;
+      --acct-red: #cc0202;
+      --bg: #f7f8fb;
+      --sidebar-width: 270px;
+      --header-height: 70px;
+      --footer-height: 55px;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: #182038;
+      min-height: 100vh;
+    }
+
+    /* Login Page Styles */
+    .login-container {
+      display: flex;
+      width: 100%;
+      max-width: 1000px;
+      min-height: 550px;
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      margin: 20px auto;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    
+    .login-left {
+      flex: 0.7;
+      background: linear-gradient(135deg, var(--ip-blue), #034a8f);
+      color: white;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .login-left::before,
+    .login-left::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+    }
+    
+    .login-left::before { top: -70px; right: -70px; width: 200px; height: 200px; }
+    .login-left::after { bottom: -80px; left: -80px; width: 250px; height: 250px; }
+
+    .logo-container {
+      background: white;
+      border-radius: 15px;
+      padding: 10px;
+      width: 220px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      margin-bottom: 20px;
+      overflow: hidden;
+      z-index: 2;
+    }
+    
+    .logo-image {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 10px;
+      transition: transform 0.3s ease;
+    }
+    
+    .logo-container:hover .logo-image {
+      transform: scale(1.1);
+    }
+    
+    .logo-text {
+      font-family: 'IPACCTFONT', 'Poppins', Arial Black, sans-serif;
+      font-size: 50px;
+      font-weight: 900;
+      margin-top: 10px;
+      text-align: center;
+    }
+    
+    .logo-ip { color: var(--ip-blue); }
+    .logo-crm { color: var(--acct-red); }
+
+    .admin-portal-text {
+      font-size: 30px;
+      font-weight: 800;
+      margin-top: 15px;
+      opacity: 1;
+      text-align: center;
+      color: white;
+    }
+
+    .login-right {
+      flex: 1;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    
+    .login-form-container {
+      width: 100%;
+      max-width: 350px;
+      margin: 0 auto;
+    }
+    
+    .login-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--ip-blue);
+      text-align: center;
+      margin: 10px 0 5px;
+    }
+    
+    .login-subtitle {
+      text-align: center;
+      font-size: 16px;
+      color: #677;
+      margin-bottom: 30px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ip-blue);
+      display: block;
+      margin-bottom: 8px;
+    }
+    
+    .input-with-icon {
+      position: relative;
+    }
+    
+    .input-with-icon i {
+      position: absolute;
+      top: 50%;
+      left: 15px;
+      transform: translateY(-50%);
+      color: #8c9cc5;
+    }
+    
+    .input-with-icon input {
+      width: 100%;
+      padding: 12px 15px 12px 45px;
+      border: 1px solid #e0e7ff;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: 'Poppins', sans-serif;
+      transition: all 0.3s ease;
+    }
+    
+    .input-with-icon input:focus {
+      outline: none;
+      border-color: var(--ip-blue);
+      box-shadow: 0 0 0 3px rgba(3,53,103,0.1);
+    }
+    
+    .password-toggle {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #8c9cc5;
+      cursor: pointer;
+    }
+    
+    .forgot-password {
+      display: block;
+      text-align: right;
+      font-size: 13px;
+      color: var(--ip-blue);
+      text-decoration: none;
+      margin-top: 5px;
+      transition: color 0.3s ease;
+    }
+    
+    .forgot-password:hover { color: var(--acct-red); }
+    
+    .login-btn {
+      width: 100%;
+      background: var(--ip-blue);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: all 0.3s ease;
+    }
+    
+    .login-btn:hover {
+      background: #02294d;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(3,53,103,0.2);
+    }
+    
+    .powered-by {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 17.6px;
+      color: #000;
+      font-weight: 700;
+    }
+
+    .powered-by-text { margin-right: 5px; }
+    
+    .powered-by-logo {
+      font-family: 'IPACCTFONT','Poppins',Arial Black,sans-serif;
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--ip-blue);
+    }
+    
+    .powered-by-logo span { color: var(--acct-red); }
+
+    /* Dashboard Styles (Initially Hidden) */
+    .dashboard-container {
+      display: none;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    /* Header Styles */
+    .header {
+      height: var(--header-height);
+      background: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 25px;
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      z-index: 99;
+    }
+    
+    .search-container {
+      display: flex;
+      align-items: center;
+      background: #f5f7fb;
+      border-radius: 20px;
+      padding: 8px 15px;
+      width: 300px;
+      margin: 0 auto;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .search-container input {
+      border: none;
+      background: transparent;
+      padding: 5px 10px;
+      width: 100%;
+      outline: none;
+      font-family: 'Poppins', sans-serif;
+    }
+    
+    .header-icons {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-left: auto;
+    }
+    
+    .icon-button {
+      background: #f5f7fb;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    
+    .icon-button:hover {
+      background: #e6edf9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: var(--acct-red);
+      color: white;
+      font-size: 10px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+    
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      position: relative;
+    }
+    
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, var(--ip-blue), var(--acct-red));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      overflow: hidden;
+      background-size: cover;
+      background-position: center;
+    }
+    
+    /* White Sidebar Styles */
+    .sidebar {
+      position: fixed;
+      top: 0; 
+      bottom: 0; 
+      left: 0;
+      width: var(--sidebar-width);
+      background: white;
+      color: var(--ip-blue);
+      padding: 20px 0;
+      overflow-y: auto;
+      box-shadow: 4px 0 15px rgba(0,0,0,0.05);
+      z-index: 100;
+    }
+    
+    .logo {
+      font-size: 28px;
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 30px;
+      font-family: 'IPACCTFONT', 'Poppins', Arial Black, sans-serif;
+    }
+    
+    .logo span:first-child {
+      color: var(--ip-blue);
+    }
+    
+    .logo span:last-child {
+      color: var(--acct-red);
+    }
+    
+    ul.menu, ul.submenu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    li.menu-item {
+      padding: 12px 20px 12px 50px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ip-blue);
+      cursor: pointer;
+      position: relative;
+      border-left: 3px solid transparent;
+      transition: all 0.3s ease;
+    }
+    
+    li.menu-item:hover {
+      background: #ffebeb;
+      color: var(--acct-red);
+      border-left: 3px solid var(--acct-red);
+    }
+    
+    li.menu-item:hover i.icon {
+      transform: scale(1.1);
+    }
+    
+    li.menu-item.active {
+      background: #fff0f0;
+      color: var(--acct-red);
+      border-left: 3px solid var(--acct-red);
+    }
+    
+    i.icon {
+      position: absolute;
+      left: 18px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+    
+    li.menu-item.active i.icon {
+      color: var(--acct-red);
+    }
+    
+    /* Colorful sidebar icons */
+    .menu-item:nth-child(1) i { color: #4CAF50; }
+    .menu-item:nth-child(2) i { color: #2196F3; }
+    .menu-item:nth-child(3) i { color: #FF9800; }
+    .menu-item:nth-child(4) i { color: #9C27B0; }
+    .menu-item:nth-child(5) i { color: #FFC107; }
+    .menu-item:nth-child(6) i { color: #E91E63; }
+    .menu-item:nth-child(7) i { color: #3F51B5; }
+    .menu-item:nth-child(8) i { color: #607D8B; }
+    .menu-item:nth-child(9) i { color: #009688; }
+    .menu-item:nth-child(10) i { color: #795548; }
+    .menu-item:nth-child(11) i { color: #F44336; }
+    
+    /* Submenu - FIXED */
+    ul.submenu {
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: all 0.4s ease;
+      padding-left: 10px;
+      border-left: 2px dashed #e0e7ff;
+      margin-left: 20px;
+    }
+    
+    ul.submenu.open {
+      max-height: 500px;
+      opacity: 1;
+      padding: 10px 0 10px 10px;
+    }
+    
+    ul.submenu li {
+      padding: 8px 15px 8px 35px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #5a6c93;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      border-radius: 5px;
+      margin: 2px 0;
+    }
+    
+    ul.submenu li:hover {
+      background: #ffebeb;
+      color: var(--acct-red);
+      padding-left: 40px;
+      transform: translateX(3px);
+    }
+    
+    .main-content {
+      margin-left: var(--sidebar-width);
+      margin-top: var(--header-height);
+      width: calc(100vw - var(--sidebar-width));
+      min-height: calc(100vh - var(--header-height) - var(--footer-height));
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .dashboard-content {
+      flex: 1;
+      padding: 24px 22px 80px 22px;
+    }
+    
+    .dashboard-header h2 {
+      font-size: 25px;
+      color: var(--ip-blue);
+      margin-bottom: 8px;
+      font-weight: 900;
+    }
+    
+    .dashboard-header p {
+      color: #677;
+      font-size: 14px;
+      margin-bottom: 18px;
+    }
+    
+    .cards-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .card {
+      background: #fff;
+      border-radius: 13px;
+      box-shadow: 0 2.5px 16px #00356710;
+      border-left: 6px solid var(--ip-blue);
+      padding: 20px;
+      min-height: 120px;
+      transition: box-shadow .14s, transform .13s;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .card.red { border-left: 6px solid #dc3232; }
+    .card.green { border-left: 6px solid #18bc55; }
+    .card.orange { border-left: 6px solid #fbb13c; }
+    
+    .card .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #496ee9;
+      margin-bottom: 10px;
+    }
+    
+    .card .card-value {
+      font-size: 28px;
+      font-weight: 900;
+      margin: 10px 0;
+      color: #0c1526;
+    }
+    
+    .card .card-action {
+      font-size: 12px;
+      color: #1970d7;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: auto;
+    }
+    
+    .card .card-action:hover {
+      color: var(--acct-red);
+      transform: translateX(3px);
+    }
+    
+    .card:hover {
+      box-shadow: 0 8.5px 14px #08356718;
+      transform: translateY(-2px);
+    }
+    
+    .shortcuts {
+      background: #fff;
+      border-radius: 11px;
+      box-shadow: 0 2px 10px #0033670d;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .shortcuts-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1e3760;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .shortcuts-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      align-items: center;
+    }
+    
+    .shortcut-link {
+      color: #033567;
+      font-size: 14px;
+      text-decoration: none;
+      padding: 12px 15px;
+      border-radius: 10px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all .3s;
+      border-left: 4px solid #3070be;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0,53,103,0.08);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .shortcut-link:hover {
+      background: #ffebeb;
+      color: var(--acct-red);
+      border-left: 4px solid var(--acct-red);
+      box-shadow: 0 8px 15px #1a237e13;
+      transform: translateY(-2px);
+    }
+    
+    .shortcut-link i {
+      font-size: 16px;
+      transition: all 0.2s ease;
+    }
+    
+    .shortcut-link:hover i {
+      transform: scale(1.1);
+    }
+    
+    /* Colorful shortcut icons */
+    .shortcut-link:nth-child(1) i { color: #4CAF50; }
+    .shortcut-link:nth-child(2) i { color: #FF9800; }
+    .shortcut-link:nth-child(3) i { color: #9C27B0; }
+    .shortcut-link:nth-child(4) i { color: #607D8B; }
+    .shortcut-link:nth-child(5) i { color: #E91E63; }
+    .shortcut-link:nth-child(6) i { color: #3F51B5; }
+    .shortcut-link:nth-child(7) i { color: #009688; }
+    .shortcut-link:nth-child(8) i { color: #FFC107; }
+    .shortcut-link:nth-child(9) i { color: #795548; }
+    .shortcut-link:nth-child(10) i { color: #F44336; }
+    
+    .stats-grid {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .stats-section {
+      background: white;
+      border-radius: 13px;
+      box-shadow: 0 3px 13px #00336713;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+    
+    .stats-section:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px #00336720;
+    }
+    
+    .stats-section h3 {
+      font-size: 14px;
+      color: var(--ip-blue);
+      font-weight: 900;
+      margin: 0 0 15px 0;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      padding: 8px 0;
+      border-bottom: 1px solid #f3f4fa;
+    }
+    
+    .stats-row:last-child {
+      border-bottom: none;
+    }
+    
+    .stats-label {
+      color: #8390ad;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .stats-value {
+      font-weight: 900;
+      color: #101928;
+    }
+    
+    .finance-label {
+      color: #6e7a92;
+      font-size: 13px;
+      font-weight: 700;
+      margin: 15px 0 5px 0;
+    }
+    
+    .progress-container {
+      width: 100%;
+      background: #f0f4ff;
+      border-radius: 10px;
+      height: 8px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 1.5s ease-in-out;
+    }
+    
+    .cpu-progress {
+      background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+      width: 0.25%;
+    }
+    
+    .memory-progress {
+      background: linear-gradient(90deg, #ff758c 0%, #ff7eb3 100%);
+      width: 66.17%;
+    }
+    
+    .disk-progress {
+      background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+      width: 49.21%;
+    }
+    
+    .load-avg-container {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    
+    .load-value {
+      background: #f0f4ff;
+      padding: 5px 12px;
+      border-radius: 15px;
+      font-size: 12px;
+      font-weight: 700;
+      flex: 1;
+      text-align: center;
+    }
+    
+    .load-value:nth-child(1) { background: #e6f7ff; color: #1890ff; }
+    .load-value:nth-child(2) { background: #f6ffed; color: #52c41a; }
+    .load-value:nth-child(3) { background: #fff2e8; color: #fa8c16; }
+    
+    .device-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .status-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    
+    .status-up {
+      background: #52c41a;
+      box-shadow: 0 0 0 rgba(82, 196, 26, 0.4);
+      animation: pulse-green 2s infinite;
+    }
+    
+    .status-down {
+      background: #f5222d;
+      box-shadow: 0 0 0 rgba(245, 34, 45, 0.4);
+      animation: pulse-red 2s infinite;
+    }
+    
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin: 30px 0;
+      flex-wrap: wrap;
+    }
+    
+    .action-btn {
+      background: var(--ip-blue);
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 25px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(3, 53, 103, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .action-btn:hover {
+      background: #02294d;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(3, 53, 103, 0.3);
+    }
+    
+    .visualization-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+    
+    .network-chart-container {
+      background: #fff;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 2px 12px #00336712;
+      transition: all 0.3s ease;
+      min-height: 300px;
+    }
+    
+    .network-chart-container:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px #00336720;
+    }
+    
+    .network-chart-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ip-blue);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    #networkChart {
+      width: 100% !important;
+      height: 240px !important;
+      max-height: 240px;
+    }
+    
+    .cpu-chart-container {
+      background: #fff;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 2px 12px #00336712;
+      transition: all 0.3s ease;
+      min-height: 300px;
+      margin-top: 20px;
+    }
+    
+    .cpu-chart-container:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px #00336720;
+    }
+    
+    .cpu-chart-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ip-blue);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    #cpuLoadChart {
+      width: 100% !important;
+      height: 240px !important;
+      max-height: 240px;
+    }
+    
+    .zone-map-container {
+      background: #fff;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 2px 12px #00336712;
+      transition: all 0.3s ease;
+    }
+    
+    .zone-map-container:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px #00336720;
+    }
+    
+    .zone-map-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ip-blue);
+      margin-bottom: 15px;
+    }
+    
+    #zoneMap {
+      height: 220px;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+    
+    .zone-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    
+    .zone-stat-item {
+      background: #f7f9ff;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    
+    .zone-stat-item:hover {
+      background: #e6eeff;
+      transform: translateY(-2px);
+    }
+    
+    .zone-stat-value {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--ip-blue);
+    }
+    
+    .zone-stat-label {
+      font-size: 12px;
+      color: #6e7a92;
+      font-weight: 600;
+      margin-top: 5px;
+    }
+    
+    @keyframes pulse-green {
+      0% { box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(82, 196, 26, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(82, 196, 26, 0); }
+    }
+    
+    @keyframes pulse-red {
+      0% { box-shadow: 0 0 0 0 rgba(245, 34, 45, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(245, 34, 45, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(245, 34, 45, 0); }
+    }
+    
+    .footer {
+      font-family: 'IPACCTFONT', 'Poppins', Arial Black, sans-serif;
+      background: #fff;
+      border-top: 1px solid #e0e0e0;
+      text-align: center;
+      font-weight: 700;
+      height: var(--footer-height);
+      width: 100%;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10001;
+      font-size: 20px;
+    }
+    
+    .footer-text {
+      color: #000;
+      margin-right: 10px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 16px;
+    }
+    
+    .footer-brand {
+      font-family: 'IPACCTFONT', 'Poppins', Arial Black, sans-serif !important;
+      font-size: 24px;
+      color: var(--ip-blue);
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      user-select: none;
+    }
+    
+    .footer-brand span {
+      color: var(--acct-red);
+    }
+    
+    .icon-button:nth-child(1) .notification-badge {
+      background: linear-gradient(45deg, #FF5722, #FF9800);
+    }
+    
+    .icon-button:nth-child(2) .notification-badge {
+      background: linear-gradient(45deg, #F44336, #E91E63);
+    }
+    
+    .logout-btn {
+      background: linear-gradient(45deg, #F44336, #E91E63);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 80px auto 20px auto;
+      width: 80%;
+      justify-content: center;
+    }
+    
+    .logout-btn:hover {
+      background: linear-gradient(45deg, #E91E63, #F44336);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
+    }
+    
+    /* Notification Dropdown Styles */
+    .notification-dropdown, .alerts-dropdown, .profile-dropdown {
+      position: absolute;
+      top: 50px;
+      right: 0;
+      width: 350px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    
+    .notification-dropdown.active, .alerts-dropdown.active, .profile-dropdown.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    
+    .notification-header, .alerts-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .notification-title, .alerts-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--ip-blue);
+    }
+    
+    .mark-all-read {
+      font-size: 12px;
+      color: var(--ip-blue);
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    
+    .mark-all-read:hover {
+      color: var(--acct-red);
+    }
+    
+    .notification-list, .alerts-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .notification-item, .alert-item {
+      padding: 15px 20px;
+      border-bottom: 1px solid #f5f5f5;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    .notification-item:hover, .alert-item:hover {
+      background: #f9f9f9;
+    }
+    
+    .notification-item:last-child, .alert-item:last-child {
+      border-bottom: none;
+    }
+    
+    .notification-message, .alert-message {
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .notification-time, .alert-time {
+      font-size: 12px;
+      color: #999;
+    }
+    
+    .notification-icon, .alert-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 12px;
+    }
+    
+    .notification-icon.info {
+      background: #2196F3;
+    }
+    
+    .notification-icon.success {
+      background: #4CAF50;
+    }
+    
+    .notification-icon.warning {
+      background: #FF9800;
+    }
+    
+    .notification-icon.error {
+      background: #F44336;
+    }
+    
+    .alert-icon.critical {
+      background: #F44336;
+    }
+    
+    .alert-icon.warning {
+      background: #FF9800;
+    }
+    
+    .alert-icon.info {
+      background: #2196F3;
+    }
+    
+    .notification-footer, .alerts-footer {
+      padding: 12px 20px;
+      text-align: center;
+      border-top: 1px solid #f0f0f0;
+    }
+    
+    .view-all {
+      font-size: 14px;
+      color: var(--ip-blue);
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    
+    .view-all:hover {
+      color: var(--acct-red);
+    }
+    
+    .profile-dropdown {
+      width: 250px;
+      right: 0;
+    }
+    
+    .profile-header {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, var(--ip-blue), var(--acct-red));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 24px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      background-size: cover;
+      background-position: center;
+    }
+    
+    .profile-name {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--ip-blue);
+      margin-bottom: 5px;
+    }
+    
+    .profile-role {
+      font-size: 14px;
+      color: #999;
+    }
+    
+    .profile-menu {
+      padding: 10px 0;
+    }
+    
+    .profile-menu-item {
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    .profile-menu-item:hover {
+      background: #f9f9f9;
+    }
+    
+    .profile-menu-item i {
+      width: 20px;
+      color: var(--ip-blue);
+    }
+    
+    .profile-menu-item span {
+      font-size: 14px;
+      color: #333;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    @media (max-width: 768px) {
+      .login-container { 
+        flex-direction: column; 
+        margin: 10px;
+        max-width: 100%;
+        min-height: auto;
+      }
+      .login-left { 
+        flex: none; 
+        padding: 30px 20px; 
+        min-height: 200px;
+      }
+      .login-right { padding: 30px 20px; }
+      .login-title { font-size: 24px; }
+      .logo-container { width: 180px; }
+      .logo-text { font-size: 32px; }
+      .admin-portal-text { font-size: 24px; }
+      .visualization-container { grid-template-columns: 1fr; }
+      .shortcuts-list { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: 1fr; }
+      .notification-dropdown, .alerts-dropdown {
+        width: 300px;
+        right: -50px;
+      }
+    }
+    
+    @media (max-width: 950px) {
+      .sidebar { width: 70px; }
+      .header { left: 70px; }
+      .main-content { margin-left: 70px; width: calc(100vw - 70px); }
+      .logo { font-size: 12px; }
+      .dashboard-content { padding: 15px; }
+      .cards-row { grid-template-columns: 1fr; }
+      .search-container {
+        position: relative;
+        left: 0;
+        transform: none;
+        margin: 0;
+        width: 200px;
+      }
+      .logout-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        padding: 0;
+        margin-top: 20px;
+      }
+      .logout-btn span { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Page (Initially Visible) -->
+  <div class="login-container" id="loginPage">
+    <div class="login-left">
+      <div class="logo-container">
+        <img src="../crm/logoutpic.jpg" alt="IPCRM Logo" class="logo-image">
+        <div class="logo-text"><span class="logo-ip">IP</span><span class="logo-crm">CRM</span></div>
+      </div>
+      <div class="admin-portal-text">Admin Portal</div>
+    </div>
+    <div class="login-right">
+      <div class="login-form-container">
+         <p class="login-subtitle">Enter your credentials to access the dashboard</p>
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="username">Login</label>
+            <div class="input-with-icon">
+              <i class="fas fa-user"></i>
+              <input type="text" id="username" placeholder="Enter your username" value="admin">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <div class="input-with-icon">
+              <i class="fas fa-lock"></i>
+              <input type="password" id="password" placeholder="Enter your password" value="admin">
+              <span class="password-toggle" id="passwordToggle"><i class="fas fa-eye"></i></span>
+            </div>
+            <a href="#" class="forgot-password">Forgot your password?</a>
+          </div>
+          <button type="submit" class="login-btn">Sign in</button>
+        </form>
+        <div class="powered-by">
+          <span class="powered-by-text">Powered by</span>
+          <span class="powered-by-logo">IP<span>ACCT</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard (Initially Hidden) -->
+  <div class="dashboard-container" id="dashboardPage">
+    <!-- White Sidebar -->
+    <aside class="sidebar">
+      <div class="logo"><span>IP</span><span>CRM</span></div>
+      <ul class="menu">
+        <!-- dashbord -->
+        <li class="menu-item active"><i class="icon fa fa-users"></i> Dashbord</li>
+
+        <!-- Customers -->
+        <li class="menu-item has-submenu"><i class="icon fa fa-user"></i> Customers</li>
+        <ul class="submenu">
+          <li>➕ Add</li>
+          <li>🔍 Search</li>
+          <li>📋 List</li>
+          <li class="has-submenu">🎫 Vouchers</li>
+          <li>🗺 Maps</li>
+        </ul>
+
+        <!-- Leads -->
+        <li class="menu-item has-submenu"><i class="icon fa fa-bullseye"></i> Leads</li>
+        <ul class="submenu">
+          <li>✨ Create</li>
+          <li>🔍 Search</li>
+          <li>📋 List</li>
+        </ul>
+
+        <!-- Tickets -->
+        <li class="menu-item has-submenu"><i class="icon fa fa-ticket-alt"></i> Tickets</li>
+        <ul class="submenu">
+          <li>📊 Dashboard</li>
+          <li>📝 List</li>
+          <li>📁 Archive</li>
+          <li>👥 Recipients</li>
+        </ul>
+
+        <!-- Finance -->
+        <li class="menu-item has-submenu"><i class="icon fa fa-coins"></i> Finance</li>
+        <ul class="submenu">
+          <li>📊 Dashboard</li>
+          <li>💳 Transactions</li>
+          <li>📄 Invoices</li>
+          <li>📃 Credit notes</li>
+          <li>🧾 Proforma Invoices</li>
+          <li>💰 Payments</li>
+          <li>📜 History & Preview</li>
+          <li>🧾 Payment statements</li>
+          <li>🎫 Refill cards</li>
+          <li>💸 Costs</li>
+        </ul>
+
+        <!-- Messages -->
+        <li class="menu-item has-submenu"><i class="icon fa fa-envelope"></i> Messages</li>
+        <ul class="submenu">
+          <li>📬 Inbox</li>
+          <li>📡 Mass sending</li>
+          <li>📝 Templates</li>
+          <li>📜 History</li>
+        </ul>
+
+        <!-- Zone -->
+        <li class="menu-item has-submenu"><i class="icon fa fa-globe"></i> Zone</li>
+        <ul class="submenu">
+          <li>📊 Zone Dashboard</li>
+          <li>📋 Zone List</li>
+          <li>➕ Add Zone</li>
+          <li>💰 Zone Balance</li>
+          <li>🔄 Server Sync</li>
+          <li>📈 Zone Reports</li>
+        </ul>
+
+        <!-- Server -->
+        <li class="menu-item has-submenu"><i class="icon fa fa-server"></i> Server</li>
+        <ul class="submenu">
+          <li>📊 Server Status</li>
+          <li>🌐 Network Management</li>
+          <li>⚙️ Router Config</li>
+          <li>🔢 IP Management</li>
+          <li>👁️ Monitoring</li>
+        </ul>
+
+        <!-- Log Server -->
+        <li class="menu-item has-submenu"><i class="icon fa fa-chart-bar"></i> Log Server</li>
+        <ul class="submenu">
+          <li>📊 Log Dashboard</li>
+          <li>📜 Server Logs</li>
+          <li>💾 Storage Monitor</li>
+          <li>🔄 Sync Status</li>
+          <li>🚔 Police Reports</li>
+          <li>📈 Log Analytics</li>
+        </ul>
+
+        <!-- Administration -->
+        <li class="menu-item has-submenu"><i class="icon fa fa-cogs"></i> Administration</li>
+        <ul class="submenu">
+          <li>👤 Users</li>
+          <li>👥 Roles</li>
+          <li>🤝 Partners</li>
+          <li>📍 Locations</li>
+          <li>🔑 API Keys</li>
+
+        <!-- Config -->
+        <li class="menu-item has-submenu"><i class="icon fa fa-wrench"></i> Config</li>
+        <ul class="submenu">
+          <li>🏢 Company Info</li>
+          <li>⚙️ System Settings</li>
+          <li>🔗 Integrations</li>
+          <li>📝 Templates</li>
+        </ul>
+      </ul>
+      
+      <!-- Logout Button -->
+      <button class="logout-btn" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </button>
+    </aside>
+    
+    <!-- Header -->
+    <header class="header">
+      <div class="search-container">
+        <i class="fas fa-search" style="color: #8c9cc5;"></i>
+        <input type="text" placeholder="Search...">
+      </div>
+      
+      <div class="header-icons">
+        <!-- Notifications Icon with Dropdown -->
+        <div class="icon-button" id="notificationButton">
+          <i class="fas fa-bell" style="color: #FF9800;"></i>
+          <div class="notification-badge">3</div>
+          
+          <!-- Notifications Dropdown -->
+          <div class="notification-dropdown" id="notificationDropdown">
+            <div class="notification-header">
+              <div class="notification-title">Notifications</div>
+              <div class="mark-all-read">Mark all as read</div>
+            </div>
+            <div class="notification-list">
+              <div class="notification-item">
+                <div class="notification-message">
+                  <div class="notification-icon info">
+                    <i class="fas fa-info"></i>
+                  </div>
+                  <div>
+                    <div>New customer registration: John Smith</div>
+                    <div class="notification-time">10 minutes ago</div>
+                  </div>
+                </div>
+              </div>
+              <div class="notification-item">
+                <div class="notification-message">
+                  <div class="notification-icon success">
+                    <i class="fas fa-check"></i>
+                  </div>
+                  <div>
+                    <div>Monthly payment received from Zone 2</div>
+                    <div class="notification-time">1 hour ago</div>
+                  </div>
+                </div>
+              </div>
+              <div class="notification-item">
+                <div class="notification-message">
+                  <div class="notification-icon warning">
+                    <i class="fas fa-exclamation"></i>
+                  </div>
+                  <div>
+                    <div>System backup scheduled for tonight</div>
+                    <div class="notification-time">2 hours ago</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="notification-footer">
+              <div class="view-all">View All Notifications</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Alerts Icon with Dropdown -->
+        <div class="icon-button" id="alertsButton">
+          <i class="fas fa-exclamation-triangle" style="color: #F44336;"></i>
+          <div class="notification-badge">5</div>
+          
+          <!-- Alerts Dropdown -->
+          <div class="alerts-dropdown" id="alertsDropdown">
+            <div class="alerts-header">
+              <div class="alerts-title">System Alerts</div>
+              <div class="mark-all-read">Clear All</div>
+            </div>
+            <div class="alerts-list">
+              <div class="alert-item">
+                <div class="alert-message">
+                  <div class="alert-icon critical">
+                    <i class="fas fa-server"></i>
+                  </div>
+                  <div>
+                    <div>Server Mumbai-01 is down</div>
+                    <div class="alert-time">15 minutes ago</div>
+                  </div>
+                </div>
+              </div>
+              <div class="alert-item">
+                <div class="alert-message">
+                  <div class="alert-icon warning">
+                    <i class="fas fa-hdd"></i>
+                  </div>
+                  <div>
+                    <div>Disk usage at 92% on Server Delhi-02</div>
+                    <div class="alert-time">1 hour ago</div>
+                  </div>
+                </div>
+              </div>
+              <div class="alert-item">
+                <div class="alert-message">
+                  <div class="alert-icon critical">
+                    <i class="fas fa-wifi"></i>
+                  </div>
+                  <div>
+                    <div>Network device Router-03 is offline</div>
+                    <div class="alert-time">2 hours ago</div>
+                  </div>
+                </div>
+              </div>
+              <div class="alert-item">
+                <div class="alert-message">
+                  <div class="alert-icon warning">
+                    <i class="fas fa-memory"></i>
+                  </div>
+                  <div>
+                    <div>High memory usage on Server Chennai-01</div>
+                    <div class="alert-time">3 hours ago</div>
+                  </div>
+                </div>
+              </div>
+              <div class="alert-item">
+                <div class="alert-message">
+                  <div class="alert-icon info">
+                    <i class="fas fa-database"></i>
+                  </div>
+                  <div>
+                    <div>Database backup completed successfully</div>
+                    <div class="alert-time">5 hours ago</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="alerts-footer">
+              <div class="view-all">View All Alerts</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- User Profile with Dropdown -->
+        <div class="user-profile" id="userProfile">
+          <div class="user-avatar" id="userAvatar">A</div>
+          <div>
+            <div style="font-weight: 600; font-size: 14px;">Admin User</div>
+            <div style="font-size: 12px; color: #8c9cc5;">Administrator</div>
+          </div>
+          
+          <!-- Profile Dropdown -->
+          <div class="profile-dropdown" id="profileDropdown">
+            <div class="profile-header">
+              <div class="profile-avatar" id="profileAvatar">A</div>
+              <div class="profile-name">Admin User</div>
+              <div class="profile-role">Administrator</div>
+            </div>
+            <div class="profile-menu">
+              <div class="profile-menu-item" onclick="changeProfilePhoto()">
+                <i class="fas fa-camera"></i>
+                <span>Change Photo</span>
+              </div>
+              <div class="profile-menu-item" onclick="editProfile()">
+                <i class="fas fa-user-edit"></i>
+                <span>Edit Profile</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+    
+    <div class="main-content">
+      <section class="dashboard-content">
+        <div class="dashboard-header">
+          <h2>Dashboard Overview</h2>
+          <p>Welcome to your IPCRM admin panel - Complete system monitoring and management</p>
+        </div>
+        
+        <div class="cards-row">
+          <div class="card green">
+            <div class="card-title">Online Customers</div>
+            <div class="card-value">3</div>
+            <div class="card-action">View Details →</div>
+          </div>
+          
+          <div class="card">
+            <div class="card-title">New Customers</div>
+            <div class="card-value">10</div>
+            <div class="card-action">View Details →</div>
+          </div>
+          
+          <div class="card orange">
+            <div class="card-title">Open Tickets</div>
+            <div class="card-value">3</div>
+            <div class="card-action">View Details →</div>
+          </div>
+          
+          <div class="card red">
+            <div class="card-title">Devices Down</div>
+            <div class="card-value">2</div>
+            <div class="card-action">View Details →</div>
+          </div>
+        </div>
+        
+        <!-- Network Traffic and Zone Map Visualization -->
+        <div class="visualization-container">
+          <div class="charts-column">
+            <div class="network-chart-container">
+              <div class="network-chart-title">
+                <i class="fas fa-chart-line"></i> Network Traffic Monitor
+              </div>
+              <canvas id="networkChart"></canvas>
+            </div>
+            
+            <div class="cpu-chart-container">
+              <div class="cpu-chart-title">
+                <i class="fas fa-microchip"></i> CPU Load Distribution
+              </div>
+              <canvas id="cpuLoadChart"></canvas>
+            </div>
+          </div>
+          
+          <div class="zone-map-container">
+            <div class="zone-map-title">Zone Coverage Map</div>
+            <div id="zoneMap"></div>
+            <div class="zone-stats">
+              <div class="zone-stat-item">
+                <div class="zone-stat-value">4</div>
+                <div class="zone-stat-label">Total Zones</div>
+              </div>
+              <div class="zone-stat-item">
+                <div class="zone-stat-value">3</div>
+                <div class="zone-stat-label">Active Zones</div>
+              </div>
+              <div class="zone-stat-item">
+                <div class="zone-stat-value">$12,450</div>
+                <div class="zone-stat-label">Monthly Revenue</div>
+              </div>
+              <div class="zone-stat-item">
+                <div class="zone-stat-value">$5,200</div>
+                <div class="zone-stat-label">Pending Revenue</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="shortcuts">
+          <div class="shortcuts-title">
+            <i class="fas fa-bolt"></i> Quick Actions & Shortcuts
+          </div>
+          <div class="shortcuts-list">
+            <a class="shortcut-link" href="#"><i class="fas fa-user-plus"></i>Add Customer</a>
+            <a class="shortcut-link" href="#"><i class="fas fa-bullseye"></i>Add Lead</a>
+            <a class="shortcut-link" href="#"><i class="fas fa-ticket-alt"></i>Create Ticket</a>
+            <a class="shortcut-link" href="#"><i class="fas fa-tasks"></i>Add Task</a>
+            <a class="shortcut-link" href="#"><i class="fas fa-paper-plane"></i>Send Message</a>
+            <a class="shortcut-link" href="#"><i class="fas fa-server"></i>Add Router</a>
+            <a class="shortcut-link" href="#"><i class="fas fa-microchip"></i>Add Hardware</a>
+            <a class="shortcut-link" href="#"><i class="fas fa-wifi"></i>Add Tariff Plan</a>
+            <a class="shortcut-link" href="#"><i class="fas fa-cogs"></i>Configure System</a>
+            <a class="shortcut-link" href="#"><i class="fas fa-puzzle-piece"></i>Configure Modules</a>
+          </div>
+        </div>
+        
+        <div class="stats-grid">
+          <!-- System Status Section -->
+          <div class="stats-section system-stats">
+            <h3><i class="fas fa-server"></i> System Status</h3>
+            
+            <div class="stats-row">
+              <span class="stats-label"><i class="fas fa-microchip"></i> CPU Cores</span>
+              <span class="stats-value">4 Cores</span>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label"><i class="fas fa-tachometer-alt"></i> Load Average</span>
+              <div class="load-avg-container">
+                <span class="load-value">0.05</span>
+                <span class="load-value">0.09</span>
+                <span class="load-value">0.04</span>
+              </div>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label"><i class="fas fa-cogs"></i> CPU Usage</span>
+              <span class="stats-value">0.25%</span>
+            </div>
+            <div class="progress-container">
+              <div class="progress-bar cpu-progress"></div>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label"><i class="fas fa-memory"></i> Memory Usage</span>
+              <span class="stats-value">3.83 GB (Free 33.83%)</span>
+            </div>
+            <div class="progress-container">
+              <div class="progress-bar memory-progress"></div>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label"><i class="fas fa-hdd"></i> Disk Space</span>
+              <span class="stats-value">18.23 GB (Free 49.21%)</span>
+            </div>
+            <div class="progress-container">
+              <div class="progress-bar disk-progress"></div>
+            </div>
+          </div>
+          
+          <!-- Networking Section -->
+          <div class="stats-section">
+            <h3><i class="fas fa-network-wired"></i> Network Status</h3>
+            
+            <div class="stats-row">
+              <span class="stats-label"><i class="fas fa-router"></i> Active Routers</span>
+              <span class="stats-value">
+                <span class="device-status">2 Online <span class="status-indicator status-up"></span></span>
+              </span>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label"><i class="fas fa-desktop"></i> Monitor Devices</span>
+              <span class="stats-value">
+                <span class="device-status">3 Online <span class="status-indicator status-up"></span></span>
+              </span>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label"><i class="fas fa-exclamation-triangle"></i> SNMP Down</span>
+              <span class="stats-value">
+                <span class="device-status">2 Offline <span class="status-indicator status-down"></span></span>
+              </span>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label"><i class="fas fa-exclamation-circle"></i> Ping Failed</span>
+              <span class="stats-value">
+                <span class="device-status">1 Offline <span class="status-indicator status-down"></span></span>
+              </span>
+            </div>
+          </div>
+          
+          <!-- Leads Section -->
+          <div class="stats-section">
+            <h3><i class="fas fa-user-friends"></i> Leads Management</h3>
+            
+            <div class="stats-row">
+              <span class="stats-label">Today's Tasks</span>
+              <span class="stats-value">0</span>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label">New Leads</span>
+              <span class="stats-value">1</span>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label">Active Leads</span>
+              <span class="stats-value">2</span>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label">Closed Deals</span>
+              <span class="stats-value">0</span>
+            </div>
+          </div>
+          
+          <!-- Customers Section -->
+          <div class="stats-section">
+            <h3><i class="fas fa-users"></i> Customer Overview</h3>
+            
+            <div class="stats-row">
+              <span class="stats-label">Total Customers</span>
+              <span class="stats-value">25</span>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label">New This Month</span>
+              <span class="stats-value">10</span>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label">Active Users</span>
+              <span class="stats-value">10</span>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label">Currently Online</span>
+              <span class="stats-value">3</span>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label">Online (24h)</span>
+              <span class="stats-value">7</span>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label">Blocked Users</span>
+              <span class="stats-value">2</span>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label">Inactive Users</span>
+              <span class="stats-value">3</span>
+            </div>
+          </div>
+          
+          <!-- Finance Section -->
+          <div class="stats-section">
+            <h3><i class="fas fa-money-bill"></i> Financial Summary</h3>
+            
+            <div class="finance-label">Current Month Performance</div>
+            <div class="stats-row">
+              <span class="stats-label">Total Payments</span>
+              <span class="stats-value">7 ($5,600.00)</span>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label">Paid Invoices</span>
+              <span class="stats-value">6 ($5,400.00)</span>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label">Unpaid Invoices</span>
+              <span class="stats-value">4 ($26,100.00)</span>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label">Credit Notes</span>
+              <span class="stats-value">0 ($0.00)</span>
+            </div>
+            
+            <div class="finance-label">Previous Month</div>
+            <div class="stats-row">
+              <span class="stats-label">Total Payments</span>
+              <span class="stats-value">0 ($0.00)</span>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label">Paid Invoices</span>
+              <span class="stats-value">0 ($0.00)</span>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label">Unpaid Invoices</span>
+              <span class="stats-value">0 ($0.00)</span>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label">Credit Notes</span>
+              <span class="stats-value">0 ($0.00)</span>
+            </div>
+          </div>
+          
+          <!-- Tickets Section -->
+          <div class="stats-section">
+            <h3><i class="fas fa-ticket-alt"></i> Support Tickets</h3>
+            
+            <div class="stats-row">
+              <span class="stats-label">New Tickets</span>
+              <span class="stats-value">0</span>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label">In Progress</span>
+              <span class="stats-value">1</span>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label">Resolved</span>
+              <span class="stats-value">5</span>
+            </div>
+            
+            <div class="stats-row">
+              <span class="stats-label">Waiting for Agent</span>
+              <span class="stats-value">0</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="action-buttons">
+          <button class="action-btn" id="refreshBtn">
+            <i class="fas fa-sync-alt"></i> Refresh All Data
+          </button>
+          <button class="action-btn" id="detailsBtn">
+            <i class="fas fa-chart-bar"></i> Detailed Report
+          </button>
+          <button class="action-btn" id="settingsBtn">
+            <i class="fas fa-cog"></i> System Settings
+          </button>
+        </div>
+      </section>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="footer">
+      <span class="footer-text">Powered by</span>
+      <span class="footer-brand">IP<span>ACCT</span></span>
+    </footer>
+  </div>
+  
+  <script>
+    let networkChart = null; // Global variable to store chart instance
+    let cpuLoadChart = null; // Global variable for CPU load chart
+    let activeDropdown = null; // Track which dropdown is currently active
+    
+    // Check if user is logged in
+    function checkAuth() {
+      const isLoggedIn = localStorage.getItem('ipcrm_loggedIn');
+      if (isLoggedIn === 'true') {
+        showDashboard();
+      } else {
+        showLogin();
+      }
+    }
+    
+    // Show login page
+    function showLogin() {
+      document.getElementById('loginPage').style.display = 'flex';
+      document.getElementById('dashboardPage').style.display = 'none';
+      document.body.style.display = 'flex';
+      document.body.style.alignItems = 'center';
+      document.body.style.justifyContent = 'center';
+      document.body.style.padding = '20px';
+    }
+    
+    // Show dashboard
+    function showDashboard() {
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('dashboardPage').style.display = 'block';
+      document.body.style.display = 'block';
+      document.body.style.alignItems = 'initial';
+      document.body.style.justifyContent = 'initial';
+      document.body.style.padding = '0';
+      
+      // Initialize dashboard with a delay to ensure DOM is ready
+      setTimeout(() => {
+        initDashboard();
+      }, 100);
+    }
+    
+    // Login form submission
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const u = document.getElementById('username').value;
+      const p = document.getElementById('password').value;
+      const btn = this.querySelector('.login-btn');
+      
+      if (u === 'admin' && p === 'admin') {
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
+        setTimeout(() => { 
+          localStorage.setItem('ipcrm_loggedIn', 'true');
+          showDashboard();
+          btn.innerHTML = 'Sign in';
+        }, 1500);
+      } else {
+        alert('Invalid credentials. Please use admin/admin for demo.');
+      }
+    });
+    
+    // Password toggle
+    document.getElementById('passwordToggle').addEventListener('click', function(){
+      const pi = document.getElementById('password');
+      const ico = this.querySelector('i');
+      pi.type = pi.type === 'password' ? 'text' : 'password';
+      ico.classList.toggle('fa-eye');
+      ico.classList.toggle('fa-eye-slash');
+    });
+    
+    // Logout function
+    function logout() {
+      if(confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('ipcrm_loggedIn');
+        
+        // Destroy chart if exists
+        if (networkChart) {
+          networkChart.destroy();
+          networkChart = null;
+        }
+        
+        if (cpuLoadChart) {
+          cpuLoadChart.destroy();
+          cpuLoadChart = null;
+        }
+        
+        showLogin();
+      }
+    }
+    
+    // Initialize dashboard - FIXED VERSION
+    function initDashboard() {
+      console.log('Initializing dashboard...');
+      
+      // FIXED: Sidebar menu toggle functionality
+      document.querySelectorAll('.menu-item.has-submenu').forEach((item, index) => {
+        console.log(`Adding click listener to menu item ${index}:`, item.textContent.trim());
+        
+        // Remove any existing event listeners
+        item.removeEventListener('click', handleSubmenuClick);
+        
+        // Add new event listener
+        item.addEventListener('click', handleSubmenuClick);
+      });
+      
+      // Progress bar animation
+      setTimeout(() => {
+        const progressBars = document.querySelectorAll('.progress-bar');
+        progressBars.forEach(bar => {
+          if (bar.classList.contains('cpu-progress')) {
+            bar.style.width = '0.25%';
+          } else if (bar.classList.contains('memory-progress')) {
+            bar.style.width = '66.17%';
+          } else if (bar.classList.contains('disk-progress')) {
+            bar.style.width = '49.21%';
+          }
+        });
+      }, 500);
+      
+      // Button actions
+      document.getElementById('refreshBtn').addEventListener('click', function() {
+        this.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Refreshing...';
+        setTimeout(() => {
+          this.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh All Data';
+          
+          // Refresh chart data
+          if (networkChart) {
+            updateNetworkChart();
+          }
+          
+          if (cpuLoadChart) {
+            updateCpuLoadChart();
+          }
+          
+          alert('System data refreshed successfully!');
+        }, 2000);
+      });
+      
+      document.getElementById('detailsBtn').addEventListener('click', function() {
+        alert('Opening detailed system report...');
+      });
+      
+      document.getElementById('settingsBtn').addEventListener('click', function() {
+        alert('Opening system settings panel...');
+      });
+      
+      // Initialize Chart and Map
+      initNetworkChart();
+      initCpuLoadChart();
+      initZoneMap();
+      
+      // Initialize notification dropdowns
+      initNotificationDropdowns();
+      
+      // Load user profile photo if exists
+      loadUserProfilePhoto();
+    }
+    
+    // FIXED: Submenu click handler
+    function handleSubmenuClick(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const menuItem = e.currentTarget;
+      const submenu = menuItem.nextElementSibling;
+      
+      console.log('Menu item clicked:', menuItem.textContent.trim());
+      console.log('Submenu found:', submenu);
+      
+      if (submenu && submenu.classList.contains('submenu')) {
+        // Close all other submenus first
+        document.querySelectorAll('.submenu.open').forEach(openSubmenu => {
+          if (openSubmenu !== submenu) {
+            openSubmenu.classList.remove('open');
+          }
+        });
+        
+        // Toggle current submenu
+        submenu.classList.toggle('open');
+        console.log('Submenu toggled. Open:', submenu.classList.contains('open'));
+        
+        // Add visual feedback to parent menu item
+        if (submenu.classList.contains('open')) {
+          menuItem.style.backgroundColor = '#fff0f0';
+        } else {
+          menuItem.style.backgroundColor = '';
+        }
+      }
+    }
+    
+    // Initialize notification dropdowns
+    function initNotificationDropdowns() {
+      const notificationButton = document.getElementById('notificationButton');
+      const alertsButton = document.getElementById('alertsButton');
+      const userProfile = document.getElementById('userProfile');
+      
+      const notificationDropdown = document.getElementById('notificationDropdown');
+      const alertsDropdown = document.getElementById('alertsDropdown');
+      const profileDropdown = document.getElementById('profileDropdown');
+      
+      // Toggle notification dropdown
+      notificationButton.addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleDropdown(notificationDropdown);
+      });
+      
+      // Toggle alerts dropdown
+      alertsButton.addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleDropdown(alertsDropdown);
+      });
+      
+      // Toggle profile dropdown
+      userProfile.addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleDropdown(profileDropdown);
+      });
+      
+      // Close dropdowns when clicking outside
+      document.addEventListener('click', function() {
+        closeAllDropdowns();
+      });
+    }
+    
+    // Toggle dropdown
+    function toggleDropdown(dropdown) {
+      // Close all dropdowns first
+      closeAllDropdowns();
+      
+      // Open the clicked dropdown
+      if (dropdown) {
+        dropdown.classList.add('active');
+        activeDropdown = dropdown;
+      }
+    }
+    
+    // Close all dropdowns
+    function closeAllDropdowns() {
+      document.querySelectorAll('.notification-dropdown, .alerts-dropdown, .profile-dropdown').forEach(dropdown => {
+        dropdown.classList.remove('active');
+      });
+      activeDropdown = null;
+    }
+    
+    // Change profile photo
+    function changeProfilePhoto() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      
+      input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            const imageUrl = event.target.result;
+            // Save to localStorage
+            localStorage.setItem('ipcrm_profilePhoto', imageUrl);
+            // Update both avatars
+            document.getElementById('userAvatar').style.backgroundImage = `url(${imageUrl})`;
+            document.getElementById('profileAvatar').style.backgroundImage = `url(${imageUrl})`;
+            // Hide the initials
+            document.getElementById('userAvatar').innerHTML = '';
+            document.getElementById('profileAvatar').innerHTML = '';
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+      
+      input.click();
+      closeAllDropdowns();
+    }
+    
+    // Edit profile
+    function editProfile() {
+      const name = prompt('Enter your name:', 'Admin User');
+      if (name) {
+        // Update name in header
+        document.querySelector('.user-profile > div > div:first-child').textContent = name;
+        // Update name in profile dropdown
+        document.querySelector('.profile-name').textContent = name;
+        // Save to localStorage
+        localStorage.setItem('ipcrm_userName', name);
+      }
+      closeAllDropdowns();
+    }
+    
+    // Load user profile photo from localStorage
+    function loadUserProfilePhoto() {
+      const savedPhoto = localStorage.getItem('ipcrm_profilePhoto');
+      const savedName = localStorage.getItem('ipcrm_userName');
+      
+      if (savedPhoto) {
+        document.getElementById('userAvatar').style.backgroundImage = `url(${savedPhoto})`;
+        document.getElementById('profileAvatar').style.backgroundImage = `url(${savedPhoto})`;
+        document.getElementById('userAvatar').innerHTML = '';
+        document.getElementById('profileAvatar').innerHTML = '';
+      }
+      
+      if (savedName) {
+        document.querySelector('.user-profile > div > div:first-child').textContent = savedName;
+        document.querySelector('.profile-name').textContent = savedName;
+      }
+    }
+    
+    // FIXED: Network Chart initialization
+    function initNetworkChart() {
+      console.log('Initializing network chart...');
+      
+      const canvas = document.getElementById('networkChart');
+      if (!canvas) {
+        console.error('Network chart canvas not found!');
+        return;
+      }
+      
+      const ctx = canvas.getContext('2d');
+      
+      // Destroy existing chart if it exists
+      if (networkChart) {
+        networkChart.destroy();
+      }
+      
+      try {
+        networkChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: ['07:00','09:00','11:00','13:00','15:00','17:00','19:00','21:00','23:00'],
+            datasets: [
+              {
+                label: 'Download (Mbps)',
+                data: [56, 78, 62, 95, 97, 80, 70, 75, 85],
+                borderColor: '#033567',
+                backgroundColor: 'rgba(3,53,103,0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 4,
+                pointBackgroundColor: '#033567',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                borderWidth: 3
+              },
+              {
+                label: 'Upload (Mbps)',
+                data: [33, 45, 39, 41, 61, 48, 53, 44, 52],
+                borderColor: '#1970d7',
+                backgroundColor: 'rgba(25,112,215,0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 4,
+                pointBackgroundColor: '#1970d7',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                borderWidth: 3
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+              mode: 'index',
+              intersect: false,
+            },
+            plugins: { 
+              legend: { 
+                position: 'top',
+                labels: {
+                  font: {
+                    family: "'Poppins', sans-serif",
+                    size: 12,
+                    weight: 'bold'
+                  },
+                  usePointStyle: true,
+                  padding: 20
+                }
+              },
+              tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                titleColor: '#fff',
+                bodyColor: '#fff',
+                borderColor: '#033567',
+                borderWidth: 1,
+                cornerRadius: 8,
+                displayColors: true
+              }
+            },
+            scales: { 
+              y: { 
+                beginAtZero: true,
+                max: 120,
+                title: { 
+                  display: true, 
+                  text: 'Speed (Mbps)',
+                  font: {
+                    family: "'Poppins', sans-serif",
+                    size: 12,
+                    weight: 'bold'
+                  },
+                  color: '#033567'
+                }, 
+                grid: {
+                  color: 'rgba(0,53,103,0.1)',
+                  drawBorder: false
+                },
+                ticks: {
+                  font: {
+                    family: "'Poppins', sans-serif",
+                    size: 11
+                  },
+                  color: '#666'
+                }
+              }, 
+              x: { 
+                title: { 
+                  display: true, 
+                  text: 'Time',
+                  font: {
+                    family: "'Poppins', sans-serif",
+                    size: 12,
+                    weight: 'bold'
+                  },
+                  color: '#033567'
+                },
+                grid: {
+                  color: 'rgba(0,53,103,0.05)',
+                  drawBorder: false
+                },
+                ticks: {
+                  font: {
+                    family: "'Poppins', sans-serif",
+                    size: 11
+                  },
+                  color: '#666'
+                }
+              }
+            },
+            animation: {
+              duration: 2000,
+              easing: 'easeInOutCubic'
+            }
+          }
+        });
+        
+        console.log('Network chart initialized successfully!');
+        
+      } catch (error) {
+        console.error('Error creating chart:', error);
+      }
+    }
+    
+    // Function to update chart with new data
+    function updateNetworkChart() {
+      if (!networkChart) return;
+      
+      // Generate new random data
+      const newDownloadData = Array.from({length: 9}, () => Math.floor(Math.random() * 100) + 20);
+      const newUploadData = Array.from({length: 9}, () => Math.floor(Math.random() * 60) + 10);
+      
+      networkChart.data.datasets[0].data = newDownloadData;
+      networkChart.data.datasets[1].data = newUploadData;
+      
+      networkChart.update('active');
+    }
+    
+    // CPU Load Distribution Chart initialization
+    function initCpuLoadChart() {
+      console.log('Initializing CPU load chart...');
+      
+      const canvas = document.getElementById('cpuLoadChart');
+      if (!canvas) {
+        console.error('CPU load chart canvas not found!');
+        return;
+      }
+      
+      const ctx = canvas.getContext('2d');
+      
+      // Destroy existing chart if it exists
+      if (cpuLoadChart) {
+        cpuLoadChart.destroy();
+      }
+      
+      try {
+        cpuLoadChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: ['Wed 12:00', 'Wed 16:00', 'Wed 20:00', 'Thu 00:00', 'Thu 04:00', 'Thu 08:00', 'Thu 12:00', 'Thu 16:00', 'Thu 20:00', 'Fri 00:00', 'Fri 04:00', 'Fri 08:00'],
+            datasets: [
+              {
+                label: 'User Load (5.05%)',
+                data: [6.1, 5.8, 5.5, 5.2, 5.0, 5.1, 5.3, 5.6, 5.8, 5.7, 5.4, 5.05],
+                borderColor: '#FF5722',
+                backgroundColor: 'rgba(255, 87, 34, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 3,
+                borderWidth: 2
+              },
+              {
+                label: 'Nice (0%)',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                borderColor: '#2196F3',
+                backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 3,
+                borderWidth: 2
+              },
+              {
+                label: 'Idle (89.18%)',
+                data: [89.5, 89.3, 89.1, 89.4, 89.6, 89.5, 89.3, 89.1, 89.0, 89.2, 89.4, 89.18],
+                borderColor: '#4CAF50',
+                backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 3,
+                borderWidth: 2
+              },
+              {
+                label: 'IOWait (0.1%)',
+                data: [0.2, 0.15, 0.1, 0.08, 0.05, 0.07, 0.09, 0.12, 0.15, 0.13, 0.11, 0.1],
+                borderColor: '#8BC34A',
+                backgroundColor: 'rgba(139, 195, 74, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 3,
+                borderWidth: 2
+              },
+              {
+                label: 'IRQ (1.35%)',
+                data: [1.4, 1.38, 1.36, 1.34, 1.33, 1.34, 1.35, 1.36, 1.37, 1.36, 1.35, 1.35],
+                borderColor: '#FFC107',
+                backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 3,
+                borderWidth: 2
+              },
+              {
+                label: 'SoftIRQ (0.26%)',
+                data: [0.3, 0.28, 0.27, 0.26, 0.25, 0.26, 0.27, 0.28, 0.29, 0.28, 0.27, 0.26],
+                borderColor: '#795548',
+                backgroundColor: 'rgba(121, 85, 72, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 3,
+                borderWidth: 2
+              },
+              {
+                label: 'System Load (4.07%)',
+                data: [4.1, 4.05, 4.0, 3.95, 3.92, 3.95, 4.0, 4.05, 4.1, 4.08, 4.05, 4.07],
+                borderColor: '#03A9F4',
+                backgroundColor: 'rgba(3, 169, 244, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 3,
+                borderWidth: 2
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+              mode: 'index',
+              intersect: false,
+            },
+            plugins: { 
+              legend: { 
+                position: 'top',
+                labels: {
+                  font: {
+                    family: "'Poppins', sans-serif",
+                    size: 10,
+                    weight: 'bold'
+                  },
+                  usePointStyle: true,
+                  padding: 10
+                }
+              },
+              tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                titleColor: '#fff',
+                bodyColor: '#fff',
+                borderColor: '#033567',
+                borderWidth: 1,
+                cornerRadius: 8,
+                displayColors: true
+              }
+            },
+            scales: { 
+              y: { 
+                beginAtZero: true,
+                max: 100,
+                stacked: true,
+                title: { 
+                  display: true, 
+                  text: 'CPU Usage (%)',
+                  font: {
+                    family: "'Poppins', sans-serif",
+                    size: 12,
+                    weight: 'bold'
+                  },
+                  color: '#033567'
+                }, 
+                grid: {
+                  color: 'rgba(0,53,103,0.1)',
+                  drawBorder: false
+                },
+                ticks: {
+                  font: {
+                    family: "'Poppins', sans-serif",
+                    size: 11
+                  },
+                  color: '#666'
+                }
+              }, 
+              x: { 
+                title: { 
+                  display: true, 
+                  text: 'Time',
+                  font: {
+                    family: "'Poppins', sans-serif",
+                    size: 12,
+                    weight: 'bold'
+                  },
+                  color: '#033567'
+                },
+                grid: {
+                  color: 'rgba(0,53,103,0.05)',
+                  drawBorder: false
+                },
+                ticks: {
+                  font: {
+                    family: "'Poppins', sans-serif",
+                    size: 10
+                  },
+                  color: '#666'
+                }
+              }
+            },
+            animation: {
+              duration: 2000,
+              easing: 'easeInOutCubic'
+            }
+          }
+        });
+        
+        console.log('CPU load chart initialized successfully!');
+        
+      } catch (error) {
+        console.error('Error creating CPU load chart:', error);
+      }
+    }
+    
+    // Function to update CPU load chart with new data
+    function updateCpuLoadChart() {
+      if (!cpuLoadChart) return;
+      
+      // Generate new random data within realistic ranges
+      cpuLoadChart.data.datasets[0].data = Array.from({length: 12}, () => Math.random() * 2 + 4.5); // User load
+      cpuLoadChart.data.datasets[1].data = Array.from({length: 12}, () => 0); // Nice
+      cpuLoadChart.data.datasets[2].data = Array.from({length: 12}, () => Math.random() * 2 + 88); // Idle
+      cpuLoadChart.data.datasets[3].data = Array.from({length: 12}, () => Math.random() * 0.1 + 0.05); // IOWait
+      cpuLoadChart.data.datasets[4].data = Array.from({length: 12}, () => Math.random() * 0.1 + 1.3); // IRQ
+      cpuLoadChart.data.datasets[5].data = Array.from({length: 12}, () => Math.random() * 0.1 + 0.2); // SoftIRQ
+      cpuLoadChart.data.datasets[6].data = Array.from({length: 12}, () => Math.random() * 0.2 + 3.9); // System load
+      
+      cpuLoadChart.update('active');
+    }
+    
+    // Zone Map initialization
+    function initZoneMap() {
+      try {
+        const map = L.map('zoneMap').setView([20.5937, 78.9629], 5);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        
+        const zones = [
+          { id: 1, lat: 19.0760, lng: 72.8777, name: 'Mumbai Zone', customers: 1200, revenue: 4500, status: 'active' },
+          { id: 2, lat: 28.7041, lng: 77.1025, name: 'Delhi Zone', customers: 1850, revenue: 6200, status: 'active' },
+          { id: 3, lat: 13.0827, lng: 80.2707, name: 'Chennai Zone', customers: 950, revenue: 3200, status: 'active' },
+          { id: 4, lat: 22.5726, lng: 88.3639, name: 'Kolkata Zone', customers: 0, revenue: 0, status: 'disabled' }
+        ];
+        
+        zones.forEach(zone => {
+          const color = zone.status === 'active' ? '#18bc55' : '#dc3232';
+          const size = zone.customers > 0 ? Math.min(50, 20 + (zone.customers / 50)) : 30;
+          
+          const marker = L.marker([zone.lat, zone.lng], {
+            icon: L.divIcon({
+              className: 'zone-marker',
+              html: `<div style="background-color: ${color}; width: ${size}px; height: ${size}px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; box-shadow: 0 0 10px rgba(0,0,0,0.5);">${zone.id}</div>`,
+              iconSize: [size, size],
+              iconAnchor: [size/2, size/2]
+            })
+          }).addTo(map);
+          
+          marker.bindPopup(`
+            <div style="font-family: 'Poppins', sans-serif; min-width: 200px;">
+              <h3 style="margin: 0 0 10px 0; color: #033567; font-size: 16px;">${zone.name}</h3>
+              <p style="margin: 5px 0; font-size: 14px;"><strong>Status:</strong> <span style="color: ${zone.status === 'active' ? '#18bc55' : '#dc3232'}; font-weight: bold;">${zone.status.charAt(0).toUpperCase() + zone.status.slice(1)}</span></p>
+              <p style="margin: 5px 0; font-size: 14px;"><strong>Customers:</strong> ${zone.customers.toLocaleString()}</p>
+              <p style="margin: 5px 0; font-size: 14px;"><strong>Monthly Revenue:</strong> $${zone.revenue.toLocaleString()}</p>
+            </div>
+          `);
+        });
+        
+        console.log('Zone map initialized successfully!');
+        
+      } catch (error) {
+        console.error('Map initialization error:', error);
+        document.getElementById('zoneMap').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 220px; color: #999; font-size: 14px;"><i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>Map failed to load</div>';
+      }
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM loaded, checking auth...');
+      checkAuth();
+    });
+  </script>
+<!-- Code injected by live-server -->
+<script>
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
+</script>
+</body>
+</html>
