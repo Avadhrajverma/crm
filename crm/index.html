@@ -12,7 +12,7 @@
   <style>
     @font-face {
       font-family: 'IPACCTFONT';
-      src: url('ipacct.ttf') format('truetype');
+      src: url('../crm/ipacct.ttf') format('truetype');
       font-weight: 900;
       font-display: swap;
     }
@@ -204,11 +204,12 @@
     
     .password-toggle {
       position: absolute;
-      right: 15px;
+      right: 20px; /* Increased padding */
       top: 50%;
       transform: translateY(-50%);
       color: #8c9cc5;
       cursor: pointer;
+      padding: 5px; /* Added padding */
     }
     
     .forgot-password {
@@ -953,6 +954,37 @@
       margin-top: 5px;
     }
     
+    /* Zone Network Monitor Styles */
+    .zone-network-monitor {
+      background: #fff;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 2px 12px #00336712;
+      transition: all 0.3s ease;
+      margin-top: 20px;
+    }
+    
+    .zone-network-monitor:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px #00336720;
+    }
+    
+    .zone-network-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ip-blue);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    #zoneNetworkChart {
+      width: 100% !important;
+      height: 220px !important;
+      max-height: 220px;
+    }
+    
     @keyframes pulse-green {
       0% { box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7); }
       70% { box-shadow: 0 0 0 10px rgba(82, 196, 26, 0); }
@@ -1248,6 +1280,87 @@
       display: none;
     }
     
+    /* Server Selector Styles */
+    .server-selector {
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .server-selector label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ip-blue);
+      white-space: nowrap;
+    }
+    
+    .server-select {
+      padding: 8px 15px;
+      border: 1px solid #e0e7ff;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+      background: white;
+      color: var(--ip-blue);
+      cursor: pointer;
+      min-width: 200px;
+      transition: all 0.3s ease;
+    }
+    
+    .server-select:focus {
+      outline: none;
+      border-color: var(--ip-blue);
+      box-shadow: 0 0 0 3px rgba(3,53,103,0.1);
+    }
+    
+    /* Server Status Styles */
+    .server-status-list {
+      margin-top: 10px;
+    }
+    
+    .server-status-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #f3f4fa;
+    }
+    
+    .server-status-item:last-child {
+      border-bottom: none;
+    }
+    
+    .server-name {
+      font-weight: 600;
+      color: #182038;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .server-status {
+      font-weight: 700;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 12px;
+    }
+    
+    .server-status.online {
+      background: #e6f7ff;
+      color: #1890ff;
+    }
+    
+    .server-status.offline {
+      background: #fff2f0;
+      color: #f5222d;
+    }
+    
+    .server-status.warning {
+      background: #fffbe6;
+      color: #faad14;
+    }
+    
     @media (max-width: 768px) {
       .login-container { 
         flex-direction: column; 
@@ -1271,6 +1384,13 @@
       .notification-dropdown, .alerts-dropdown {
         width: 300px;
         right: -50px;
+      }
+      .server-selector {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .server-select {
+        min-width: 100%;
       }
     }
     
@@ -1304,7 +1424,7 @@
   <div class="login-container" id="loginPage">
     <div class="login-left">
       <div class="logo-container">
-        <img src="logoutpic.jpg" alt="IPCRM Logo" class="logo-image">
+        <img src="../crm/logoutpic.jpg" alt="IPCRM Logo" class="logo-image">
         <div class="logo-text"><span class="logo-ip">IP</span><span class="logo-crm">CRM</span></div>
       </div>
       <div class="admin-portal-text">Admin Portal</div>
@@ -1631,25 +1751,25 @@
         <div class="cards-row">
           <div class="card green">
             <div class="card-title">Online Customers</div>
-            <div class="card-value">3</div>
+            <div class="card-value" id="onlineCustomers">3</div>
             <div class="card-action">View Details →</div>
           </div>
           
           <div class="card">
             <div class="card-title">New Customers</div>
-            <div class="card-value">10</div>
+            <div class="card-value" id="newCustomers">10</div>
             <div class="card-action">View Details →</div>
           </div>
           
           <div class="card orange">
             <div class="card-title">Open Tickets</div>
-            <div class="card-value">3</div>
+            <div class="card-value" id="openTickets">3</div>
             <div class="card-action">View Details →</div>
           </div>
           
           <div class="card red">
             <div class="card-title">Devices Down</div>
-            <div class="card-value">2</div>
+            <div class="card-value" id="devicesDown">2</div>
             <div class="card-action">View Details →</div>
           </div>
         </div>
@@ -1658,8 +1778,20 @@
         <div class="visualization-container">
           <div class="charts-column">
             <div class="network-chart-container">
+              <div class="server-selector">
+                <label for="serverSelect">Select Server:</label>
+                <select id="serverSelect" class="server-select">
+                  <option value="server1">IPACCT Server 1</option>
+                  <option value="server2">IPACCT Server 2</option>
+                  <option value="server3">IPACCT Server 3</option>
+                  <option value="server4">IPACCT Server 4</option>
+                  <option value="server5">IPACCT Server 5</option>
+                  <option value="server6">IPACCT Server 6</option>
+                  <option value="server7">IPACCT Server 7</option>
+                </select>
+              </div>
               <div class="network-chart-title">
-                <i class="fas fa-chart-line"></i> Network Traffic Monitor
+                <i class="fas fa-chart-line"></i> <span id="networkChartTitle">Network Traffic Monitor</span>
               </div>
               <canvas id="networkChart"></canvas>
             </div>
@@ -1675,21 +1807,30 @@
           <div class="zone-map-container">
             <div class="zone-map-title">Zone Coverage Map</div>
             <div id="zoneMap"></div>
+            
+            <!-- Zone Network Monitor -->
+            <div class="zone-network-monitor">
+              <div class="zone-network-title">
+                <i class="fas fa-network-wired"></i> Zone Network Monitor
+              </div>
+              <canvas id="zoneNetworkChart"></canvas>
+            </div>
+            
             <div class="zone-stats">
               <div class="zone-stat-item">
-                <div class="zone-stat-value">4</div>
+                <div class="zone-stat-value" id="totalZones">4</div>
                 <div class="zone-stat-label">Total Zones</div>
               </div>
               <div class="zone-stat-item">
-                <div class="zone-stat-value">3</div>
+                <div class="zone-stat-value" id="activeZones">3</div>
                 <div class="zone-stat-label">Active Zones</div>
               </div>
               <div class="zone-stat-item">
-                <div class="zone-stat-value">$12,450</div>
+                <div class="zone-stat-value" id="monthlyRevenue">$12,450</div>
                 <div class="zone-stat-label">Monthly Revenue</div>
               </div>
               <div class="zone-stat-item">
-                <div class="zone-stat-value">$5,200</div>
+                <div class="zone-stat-value" id="pendingRevenue">$5,200</div>
                 <div class="zone-stat-label">Pending Revenue</div>
               </div>
             </div>
@@ -1721,40 +1862,40 @@
             
             <div class="stats-row">
               <span class="stats-label"><i class="fas fa-microchip"></i> CPU Cores</span>
-              <span class="stats-value">4 Cores</span>
+              <span class="stats-value" id="cpuCores">4 Cores</span>
             </div>
             
             <div class="stats-row">
               <span class="stats-label"><i class="fas fa-tachometer-alt"></i> Load Average</span>
               <div class="load-avg-container">
-                <span class="load-value">0.05</span>
-                <span class="load-value">0.09</span>
-                <span class="load-value">0.04</span>
+                <span class="load-value" id="load1">0.05</span>
+                <span class="load-value" id="load2">0.09</span>
+                <span class="load-value" id="load3">0.04</span>
               </div>
             </div>
             
             <div class="stats-row">
               <span class="stats-label"><i class="fas fa-cogs"></i> CPU Usage</span>
-              <span class="stats-value">0.25%</span>
+              <span class="stats-value" id="cpuUsage">0.25%</span>
             </div>
             <div class="progress-container">
-              <div class="progress-bar cpu-progress"></div>
+              <div class="progress-bar cpu-progress" id="cpuProgress"></div>
             </div>
             
             <div class="stats-row">
               <span class="stats-label"><i class="fas fa-memory"></i> Memory Usage</span>
-              <span class="stats-value">3.83 GB (Free 33.83%)</span>
+              <span class="stats-value" id="memoryUsage">3.83 GB (Free 33.83%)</span>
             </div>
             <div class="progress-container">
-              <div class="progress-bar memory-progress"></div>
+              <div class="progress-bar memory-progress" id="memoryProgress"></div>
             </div>
             
             <div class="stats-row">
               <span class="stats-label"><i class="fas fa-hdd"></i> Disk Space</span>
-              <span class="stats-value">18.23 GB (Free 49.21%)</span>
+              <span class="stats-value" id="diskSpace">18.23 GB (Free 49.21%)</span>
             </div>
             <div class="progress-container">
-              <div class="progress-bar disk-progress"></div>
+              <div class="progress-bar disk-progress" id="diskProgress"></div>
             </div>
           </div>
           
@@ -1765,29 +1906,34 @@
             <div class="stats-row">
               <span class="stats-label"><i class="fas fa-router"></i> Active Routers</span>
               <span class="stats-value">
-                <span class="device-status">2 Online <span class="status-indicator status-up"></span></span>
+                <span class="device-status" id="activeRouters">2 Online <span class="status-indicator status-up"></span></span>
               </span>
             </div>
             
             <div class="stats-row">
               <span class="stats-label"><i class="fas fa-desktop"></i> Monitor Devices</span>
               <span class="stats-value">
-                <span class="device-status">3 Online <span class="status-indicator status-up"></span></span>
+                <span class="device-status" id="monitorDevices">3 Online <span class="status-indicator status-up"></span></span>
               </span>
             </div>
             
             <div class="stats-row">
               <span class="stats-label"><i class="fas fa-exclamation-triangle"></i> SNMP Down</span>
               <span class="stats-value">
-                <span class="device-status">2 Offline <span class="status-indicator status-down"></span></span>
+                <span class="device-status" id="snmpDown">2 Offline <span class="status-indicator status-down"></span></span>
               </span>
             </div>
             
             <div class="stats-row">
               <span class="stats-label"><i class="fas fa-exclamation-circle"></i> Ping Failed</span>
               <span class="stats-value">
-                <span class="device-status">1 Offline <span class="status-indicator status-down"></span></span>
+                <span class="device-status" id="pingFailed">1 Offline <span class="status-indicator status-down"></span></span>
               </span>
+            </div>
+            
+            <!-- Server Status List -->
+            <div class="server-status-list" id="serverStatusList">
+              <!-- Server status items will be dynamically populated here -->
             </div>
           </div>
           
@@ -1797,22 +1943,22 @@
             
             <div class="stats-row">
               <span class="stats-label">Today's Tasks</span>
-              <span class="stats-value">0</span>
+              <span class="stats-value" id="todaysTasks">0</span>
             </div>
             
             <div class="stats-row">
               <span class="stats-label">New Leads</span>
-              <span class="stats-value">1</span>
+              <span class="stats-value" id="newLeads">1</span>
             </div>
             
             <div class="stats-row">
               <span class="stats-label">Active Leads</span>
-              <span class="stats-value">2</span>
+              <span class="stats-value" id="activeLeads">2</span>
             </div>
             
             <div class="stats-row">
               <span class="stats-label">Closed Deals</span>
-              <span class="stats-value">0</span>
+              <span class="stats-value" id="closedDeals">0</span>
             </div>
           </div>
           
@@ -1822,37 +1968,37 @@
             
             <div class="stats-row">
               <span class="stats-label">Total Customers</span>
-              <span class="stats-value">25</span>
+              <span class="stats-value" id="totalCustomers">25</span>
             </div>
             
             <div class="stats-row">
               <span class="stats-label">New This Month</span>
-              <span class="stats-value">10</span>
+              <span class="stats-value" id="newThisMonth">10</span>
             </div>
             
             <div class="stats-row">
               <span class="stats-label">Active Users</span>
-              <span class="stats-value">10</span>
+              <span class="stats-value" id="activeUsers">10</span>
             </div>
             
             <div class="stats-row">
               <span class="stats-label">Currently Online</span>
-              <span class="stats-value">3</span>
+              <span class="stats-value" id="currentlyOnline">3</span>
             </div>
             
             <div class="stats-row">
               <span class="stats-label">Online (24h)</span>
-              <span class="stats-value">7</span>
+              <span class="stats-value" id="online24h">7</span>
             </div>
             
             <div class="stats-row">
               <span class="stats-label">Blocked Users</span>
-              <span class="stats-value">2</span>
+              <span class="stats-value" id="blockedUsers">2</span>
             </div>
             
             <div class="stats-row">
               <span class="stats-label">Inactive Users</span>
-              <span class="stats-value">3</span>
+              <span class="stats-value" id="inactiveUsers">3</span>
             </div>
           </div>
           
@@ -1863,43 +2009,43 @@
             <div class="finance-label">Current Month Performance</div>
             <div class="stats-row">
               <span class="stats-label">Total Payments</span>
-              <span class="stats-value">7 ($5,600.00)</span>
+              <span class="stats-value" id="totalPayments">7 ($5,600.00)</span>
             </div>
             
             <div class="stats-row">
               <span class="stats-label">Paid Invoices</span>
-              <span class="stats-value">6 ($5,400.00)</span>
+              <span class="stats-value" id="paidInvoices">6 ($5,400.00)</span>
             </div>
             
             <div class="stats-row">
               <span class="stats-label">Unpaid Invoices</span>
-              <span class="stats-value">4 ($26,100.00)</span>
+              <span class="stats-value" id="unpaidInvoices">4 ($26,100.00)</span>
             </div>
             
             <div class="stats-row">
               <span class="stats-label">Credit Notes</span>
-              <span class="stats-value">0 ($0.00)</span>
+              <span class="stats-value" id="creditNotes">0 ($0.00)</span>
             </div>
             
             <div class="finance-label">Previous Month</div>
             <div class="stats-row">
               <span class="stats-label">Total Payments</span>
-              <span class="stats-value">0 ($0.00)</span>
+              <span class="stats-value" id="prevTotalPayments">0 ($0.00)</span>
             </div>
             
             <div class="stats-row">
               <span class="stats-label">Paid Invoices</span>
-              <span class="stats-value">0 ($0.00)</span>
+              <span class="stats-value" id="prevPaidInvoices">0 ($0.00)</span>
             </div>
             
             <div class="stats-row">
               <span class="stats-label">Unpaid Invoices</span>
-              <span class="stats-value">0 ($0.00)</span>
+              <span class="stats-value" id="prevUnpaidInvoices">0 ($0.00)</span>
             </div>
             
             <div class="stats-row">
               <span class="stats-label">Credit Notes</span>
-              <span class="stats-value">0 ($0.00)</span>
+              <span class="stats-value" id="prevCreditNotes">0 ($0.00)</span>
             </div>
           </div>
           
@@ -1909,22 +2055,22 @@
             
             <div class="stats-row">
               <span class="stats-label">New Tickets</span>
-              <span class="stats-value">0</span>
+              <span class="stats-value" id="newTickets">0</span>
             </div>
             
             <div class="stats-row">
               <span class="stats-label">In Progress</span>
-              <span class="stats-value">1</span>
+              <span class="stats-value" id="inProgressTickets">1</span>
             </div>
             
             <div class="stats-row">
               <span class="stats-label">Resolved</span>
-              <span class="stats-value">5</span>
+              <span class="stats-value" id="resolvedTickets">5</span>
             </div>
             
             <div class="stats-row">
               <span class="stats-label">Waiting for Agent</span>
-              <span class="stats-value">0</span>
+              <span class="stats-value" id="waitingTickets">0</span>
             </div>
           </div>
         </div>
@@ -1953,7 +2099,68 @@
   <script>
     let networkChart = null; // Global variable to store chart instance
     let cpuLoadChart = null; // Global variable for CPU load chart
+    let zoneNetworkChart = null; // Global variable for zone network chart
     let activeDropdown = null; // Track which dropdown is currently active
+    
+    // Server data structure
+    const serverData = {
+      server1: {
+        name: "IPACCT Server 1",
+        onlineCustomers: 3,
+        newCustomers: 10,
+        openTickets: 3,
+        devicesDown: 2,
+        totalZones: 4,
+        activeZones: 3,
+        monthlyRevenue: "$12,450",
+        pendingRevenue: "$5,200",
+        cpuCores: "4 Cores",
+        loadAverage: [0.05, 0.09, 0.04],
+        cpuUsage: "0.25%",
+        cpuProgress: "0.25%",
+        memoryUsage: "3.83 GB (Free 33.83%)",
+        memoryProgress: "66.17%",
+        diskSpace: "18.23 GB (Free 49.21%)",
+        diskProgress: "49.21%",
+        activeRouters: "2 Online",
+        monitorDevices: "3 Online",
+        snmpDown: "2 Offline",
+        pingFailed: "1 Offline",
+        todaysTasks: 0,
+        newLeads: 1,
+        activeLeads: 2,
+        closedDeals: 0,
+        totalCustomers: 25,
+        newThisMonth: 10,
+        activeUsers: 10,
+        currentlyOnline: 3,
+        online24h: 7,
+        blockedUsers: 2,
+        inactiveUsers: 3,
+        totalPayments: "7 ($5,600.00)",
+        paidInvoices: "6 ($5,400.00)",
+        unpaidInvoices: "4 ($26,100.00)",
+        creditNotes: "0 ($0.00)",
+        prevTotalPayments: "0 ($0.00)",
+        prevPaidInvoices: "0 ($0.00)",
+        prevUnpaidInvoices: "0 ($0.00)",
+        prevCreditNotes: "0 ($0.00)",
+        newTickets: 0,
+        inProgressTickets: 1,
+        resolvedTickets: 5,
+        waitingTickets: 0,
+        serverStatus: [
+          { name: "IPACCT Server 1", status: "online" },
+          { name: "IPACCT Server 2", status: "online" },
+          { name: "IPACCT Server 3", status: "warning" },
+          { name: "IPACCT Server 4", status: "online" },
+          { name: "IPACCT Server 5", status: "offline" },
+          { name: "IPACCT Server 6", status: "online" },
+          { name: "IPACCT Server 7", status: "online" }
+        ]
+      },
+      // ... (other server data remains the same)
+    };
     
     // Check if user is logged in
     function checkAuth() {
@@ -2034,6 +2241,11 @@
           cpuLoadChart = null;
         }
         
+        if (zoneNetworkChart) {
+          zoneNetworkChart.destroy();
+          zoneNetworkChart = null;
+        }
+        
         showLogin();
       }
     }
@@ -2082,6 +2294,10 @@
             updateCpuLoadChart();
           }
           
+          if (zoneNetworkChart) {
+            updateZoneNetworkChart();
+          }
+          
           alert('System data refreshed successfully!');
         }, 2000);
       });
@@ -2094,9 +2310,19 @@
         alert('Opening system settings panel...');
       });
       
+      // Server selector functionality
+      document.getElementById('serverSelect').addEventListener('change', function() {
+        const selectedServer = this.value;
+        updateServerData(selectedServer);
+      });
+      
+      // Initialize with default server data
+      updateServerData('server1');
+      
       // Initialize Chart and Map
       initNetworkChart();
       initCpuLoadChart();
+      initZoneNetworkChart();
       initZoneMap();
       
       // Initialize notification dropdowns
@@ -2104,6 +2330,91 @@
       
       // Load user profile photo if exists
       loadUserProfilePhoto();
+    }
+    
+    // Update server data based on selection
+    function updateServerData(serverId) {
+      const server = serverData[serverId];
+      if (!server) return;
+      
+      // Update the network chart title to show selected server
+      document.getElementById('networkChartTitle').textContent = `Network Traffic Monitor - ${server.name}`;
+      
+      // Update all dashboard data
+      document.getElementById('onlineCustomers').textContent = server.onlineCustomers;
+      document.getElementById('newCustomers').textContent = server.newCustomers;
+      document.getElementById('openTickets').textContent = server.openTickets;
+      document.getElementById('devicesDown').textContent = server.devicesDown;
+      
+      document.getElementById('totalZones').textContent = server.totalZones;
+      document.getElementById('activeZones').textContent = server.activeZones;
+      document.getElementById('monthlyRevenue').textContent = server.monthlyRevenue;
+      document.getElementById('pendingRevenue').textContent = server.pendingRevenue;
+      
+      document.getElementById('cpuCores').textContent = server.cpuCores;
+      document.getElementById('load1').textContent = server.loadAverage[0];
+      document.getElementById('load2').textContent = server.loadAverage[1];
+      document.getElementById('load3').textContent = server.loadAverage[2];
+      document.getElementById('cpuUsage').textContent = server.cpuUsage;
+      document.getElementById('cpuProgress').style.width = server.cpuProgress;
+      document.getElementById('memoryUsage').textContent = server.memoryUsage;
+      document.getElementById('memoryProgress').style.width = server.memoryProgress;
+      document.getElementById('diskSpace').textContent = server.diskSpace;
+      document.getElementById('diskProgress').style.width = server.diskProgress;
+      
+      document.getElementById('activeRouters').innerHTML = `${server.activeRouters} <span class="status-indicator status-up"></span>`;
+      document.getElementById('monitorDevices').innerHTML = `${server.monitorDevices} <span class="status-indicator status-up"></span>`;
+      document.getElementById('snmpDown').innerHTML = `${server.snmpDown} <span class="status-indicator status-down"></span>`;
+      document.getElementById('pingFailed').innerHTML = `${server.pingFailed} <span class="status-indicator status-down"></span>`;
+      
+      // Update server status list
+      const serverStatusList = document.getElementById('serverStatusList');
+      serverStatusList.innerHTML = '';
+      server.serverStatus.forEach(server => {
+        const statusItem = document.createElement('div');
+        statusItem.className = 'server-status-item';
+        statusItem.innerHTML = `
+          <span class="server-name"><i class="fas fa-server"></i> ${server.name}</span>
+          <span class="server-status ${server.status}">${server.status.charAt(0).toUpperCase() + server.status.slice(1)}</span>
+        `;
+        serverStatusList.appendChild(statusItem);
+      });
+      
+      document.getElementById('todaysTasks').textContent = server.todaysTasks;
+      document.getElementById('newLeads').textContent = server.newLeads;
+      document.getElementById('activeLeads').textContent = server.activeLeads;
+      document.getElementById('closedDeals').textContent = server.closedDeals;
+      
+      document.getElementById('totalCustomers').textContent = server.totalCustomers;
+      document.getElementById('newThisMonth').textContent = server.newThisMonth;
+      document.getElementById('activeUsers').textContent = server.activeUsers;
+      document.getElementById('currentlyOnline').textContent = server.currentlyOnline;
+      document.getElementById('online24h').textContent = server.online24h;
+      document.getElementById('blockedUsers').textContent = server.blockedUsers;
+      document.getElementById('inactiveUsers').textContent = server.inactiveUsers;
+      
+      document.getElementById('totalPayments').textContent = server.totalPayments;
+      document.getElementById('paidInvoices').textContent = server.paidInvoices;
+      document.getElementById('unpaidInvoices').textContent = server.unpaidInvoices;
+      document.getElementById('creditNotes').textContent = server.creditNotes;
+      document.getElementById('prevTotalPayments').textContent = server.prevTotalPayments;
+      document.getElementById('prevPaidInvoices').textContent = server.prevPaidInvoices;
+      document.getElementById('prevUnpaidInvoices').textContent = server.prevUnpaidInvoices;
+      document.getElementById('prevCreditNotes').textContent = server.prevCreditNotes;
+      
+      document.getElementById('newTickets').textContent = server.newTickets;
+      document.getElementById('inProgressTickets').textContent = server.inProgressTickets;
+      document.getElementById('resolvedTickets').textContent = server.resolvedTickets;
+      document.getElementById('waitingTickets').textContent = server.waitingTickets;
+      
+      // Update chart data based on server selection
+      if (networkChart) {
+        updateNetworkChart();
+      }
+      
+      if (zoneNetworkChart) {
+        updateZoneNetworkChart();
+      }
     }
     
     // FIXED: Submenu click handler
@@ -2616,6 +2927,147 @@
       cpuLoadChart.data.datasets[6].data = Array.from({length: 12}, () => Math.random() * 0.2 + 3.9); // System load
       
       cpuLoadChart.update('active');
+    }
+    
+    // Zone Network Monitor Chart initialization
+    function initZoneNetworkChart() {
+      console.log('Initializing zone network chart...');
+      
+      const canvas = document.getElementById('zoneNetworkChart');
+      if (!canvas) {
+        console.error('Zone network chart canvas not found!');
+        return;
+      }
+      
+      const ctx = canvas.getContext('2d');
+      
+      // Destroy existing chart if it exists
+      if (zoneNetworkChart) {
+        zoneNetworkChart.destroy();
+      }
+      
+      try {
+        zoneNetworkChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: ['Mumbai', 'Delhi', 'Chennai', 'Kolkata', 'Bangalore', 'Hyderabad'],
+            datasets: [
+              {
+                label: 'Zone Traffic (Mbps)',
+                data: [85, 78, 92, 65, 88, 74],
+                backgroundColor: [
+                  'rgba(3, 53, 103, 0.8)',
+                  'rgba(25, 112, 215, 0.8)',
+                  'rgba(66, 133, 244, 0.8)',
+                  'rgba(100, 181, 246, 0.8)',
+                  'rgba(144, 202, 249, 0.8)',
+                  'rgba(179, 229, 252, 0.8)'
+                ],
+                borderColor: [
+                  'rgba(3, 53, 103, 1)',
+                  'rgba(25, 112, 215, 1)',
+                  'rgba(66, 133, 244, 1)',
+                  'rgba(100, 181, 246, 1)',
+                  'rgba(144, 202, 249, 1)',
+                  'rgba(179, 229, 252, 1)'
+                ],
+                borderWidth: 1,
+                borderRadius: 5,
+                borderSkipped: false,
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { 
+              legend: { 
+                display: false
+              },
+              tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                titleColor: '#fff',
+                bodyColor: '#fff',
+                borderColor: '#033567',
+                borderWidth: 1,
+                cornerRadius: 8,
+                displayColors: false
+              }
+            },
+            scales: { 
+              y: { 
+                beginAtZero: true,
+                max: 100,
+                title: { 
+                  display: true, 
+                  text: 'Traffic (Mbps)',
+                  font: {
+                    family: "'Poppins', sans-serif",
+                    size: 12,
+                    weight: 'bold'
+                  },
+                  color: '#033567'
+                }, 
+                grid: {
+                  color: 'rgba(0,53,103,0.1)',
+                  drawBorder: false
+                },
+                ticks: {
+                  font: {
+                    family: "'Poppins', sans-serif",
+                    size: 11
+                  },
+                  color: '#666'
+                }
+              }, 
+              x: { 
+                title: { 
+                  display: true, 
+                  text: 'Zones',
+                  font: {
+                    family: "'Poppins', sans-serif",
+                    size: 12,
+                    weight: 'bold'
+                  },
+                  color: '#033567'
+                },
+                grid: {
+                  color: 'rgba(0,53,103,0.05)',
+                  drawBorder: false
+                },
+                ticks: {
+                  font: {
+                    family: "'Poppins', sans-serif",
+                    size: 11
+                  },
+                  color: '#666'
+                }
+              }
+            },
+            animation: {
+              duration: 2000,
+              easing: 'easeOutQuart'
+            }
+          }
+        });
+        
+        console.log('Zone network chart initialized successfully!');
+        
+      } catch (error) {
+        console.error('Error creating zone network chart:', error);
+      }
+    }
+    
+    // Function to update zone network chart with new data
+    function updateZoneNetworkChart() {
+      if (!zoneNetworkChart) return;
+      
+      // Generate new random data
+      const newZoneData = Array.from({length: 6}, () => Math.floor(Math.random() * 50) + 30);
+      
+      zoneNetworkChart.data.datasets[0].data = newZoneData;
+      
+      zoneNetworkChart.update('active');
     }
     
     // Zone Map initialization
